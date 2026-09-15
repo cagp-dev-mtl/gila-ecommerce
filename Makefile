@@ -23,6 +23,6 @@ ps:
 	$(DOCKER_COMPOSE) ps
 
 shell:
-	$(DOCKER_COMPOSE) exec backend bash
+	$(DOCKER_COMPOSE) exec api bash
 
 .PHONY: run rebuild-run stop down logs ps shell
