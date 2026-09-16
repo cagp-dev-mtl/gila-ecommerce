@@ -50,3 +50,9 @@ def test_import_non_csv_rejected(client):
 def test_import_non_utf8_rejected(client):
     response = upload(client, b'\xff\xfe\x00bad')
     assert response.status_code == 400
+
+
+def test_import_too_large_rejected(client):
+    content = 'name,sku,price,stock\n' + 'a' * (5 * 1024 * 1024)
+    response = upload(client, content)
+    assert response.status_code == 413

@@ -16,6 +16,7 @@ services:
   api:
     build:
       context: api
+      target: runtime
     environment:
       - DATABASE_URL=postgresql+psycopg://${POSTGRES_USER:-ecommerce}:${POSTGRES_PASSWORD:-ecommerce}@db:5432/${POSTGRES_DB:-ecommerce}
       - SEED_ON_STARTUP=${SEED_ON_STARTUP:-true}
@@ -29,6 +30,20 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  api-test:
+    build:
+      context: api
+      target: test
+    environment:
+      - DATABASE_URL=postgresql+psycopg://${POSTGRES_USER:-ecommerce}:${POSTGRES_PASSWORD:-ecommerce}@db:5432/${POSTGRES_DB:-ecommerce}_test
+    volumes:
+      - ./api:/api
+    depends_on:
+      db:
+        condition: service_healthy
+    profiles:
+      - test
 
   storefront:
     build:
