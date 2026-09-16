@@ -11,6 +11,21 @@ class ProductRepository(BaseRepository[ProductORM]):
     def get_by_sku(self, sku: str) -> ProductORM | None:
         return self.session.scalar(select(ProductORM).where(ProductORM.sku == sku))
 
+    def upsert_by_sku(self, data: dict) -> tuple[ProductORM, bool]:
+        existing = self.get_by_sku(data['sku'])
+        if existing is None:
+            product = ProductORM(**data)
+            self.session.add(product)
+            self.session.flush()
+            return product, True
+        for field, value in data.items():
+            setattr(existing, field, value)
+        self.session.flush()
+        return existing, False
+
+    def count(self) -> int:
+        return self.session.scalar(select(func.count()).select_from(ProductORM)) or 0
+
     def search(
         self,
         search: str | None,
