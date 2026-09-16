@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom'
 
 import Layout from './components/Layout'
+import CartPage from './pages/CartPage'
 import ImportPage from './pages/ImportPage'
 import ProductForm from './pages/ProductForm'
 import ProductList from './pages/ProductList'
@@ -10,6 +11,7 @@ function App() {
     <Layout>
       <Routes>
         <Route path="/" element={<ProductList />} />
+        <Route path="/cart" element={<CartPage />} />
         <Route path="/import" element={<ImportPage />} />
         <Route path="/products/new" element={<ProductForm />} />
         <Route path="/products/:id/edit" element={<ProductForm />} />

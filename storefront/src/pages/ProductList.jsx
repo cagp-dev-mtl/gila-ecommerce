@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 
 import { deleteProduct, formatError, listCategories, listProducts } from '../api/client'
 import ProductImage from '../components/ProductImage'
+import { useCart } from '../context/CartContext'
 import { useDebounce } from '../hooks/useDebounce'
 
 const PAGE_SIZE = 12
@@ -19,6 +20,7 @@ function ProductList() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const debouncedSearch = useDebounce(search, 300)
+  const { addItem } = useCart()
 
   useEffect(() => {
     listCategories()
@@ -130,6 +132,13 @@ function ProductList() {
                 </p>
               </div>
               <div className="product-actions">
+                <button
+                  className="button button-primary"
+                  disabled={product.stock === 0}
+                  onClick={() => addItem(product)}
+                >
+                  Add to cart
+                </button>
                 <Link className="button" to={`/products/${product.id}/edit`}>
                   Edit
                 </Link>

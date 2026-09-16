@@ -68,6 +68,14 @@ export async function importProducts(file) {
   return response.json()
 }
 
+export function createOrder(items, idempotencyKey) {
+  return request('/orders', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Idempotency-Key': idempotencyKey },
+    body: JSON.stringify({ items }),
+  })
+}
+
 export function formatError(error) {
   const detail = error && error.detail
   if (Array.isArray(detail)) {
