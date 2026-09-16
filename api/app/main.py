@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from app.api.controllers import health, imports, products
+from app.api.controllers import health, imports, orders, products
 from app.core.settings import Settings
 
 
@@ -10,6 +10,7 @@ def create_app() -> FastAPI:
     application.include_router(health.router, prefix='/api')
     application.include_router(products.router, prefix='/api')
     application.include_router(imports.router, prefix='/api')
+    application.include_router(orders.router, prefix='/api')
     return application
 
 

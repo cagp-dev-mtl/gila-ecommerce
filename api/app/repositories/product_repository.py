@@ -26,6 +26,12 @@ class ProductRepository(BaseRepository[ProductORM]):
     def count(self) -> int:
         return self.session.scalar(select(func.count()).select_from(ProductORM)) or 0
 
+    def get_many_for_update(self, ids: list[int]) -> dict[int, ProductORM]:
+        rows = self.session.scalars(
+            select(ProductORM).where(ProductORM.id.in_(ids)).order_by(ProductORM.id).with_for_update()
+        )
+        return {product.id: product for product in rows}
+
     def search(
         self,
         search: str | None,

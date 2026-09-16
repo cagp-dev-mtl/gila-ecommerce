@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 
 from app.core.db import Base
 from app.core.settings import Settings
-from app.models.orm import ProductORM
+from app.models.orm import OrderItemORM, OrderORM, ProductORM
 
 config = context.config
 
@@ -13,7 +13,7 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 target_metadata = Base.metadata
-_registered_models = (ProductORM,)
+_registered_models = (ProductORM, OrderORM, OrderItemORM)
 
 
 def run_migrations_offline() -> None:
