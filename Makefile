@@ -31,4 +31,19 @@ apply-migration:
 create-migration:
 	$(DOCKER_COMPOSE) exec api alembic revision -m "$(REVISION)"
 
-.PHONY: run rebuild-run stop down logs ps shell apply-migration create-migration
+TEST_DB_URL = postgresql+psycopg://ecommerce:ecommerce@db:5432/ecommerce_test
+PYTEST_RUN = $(DOCKER_COMPOSE) run --rm -e DATABASE_URL=$(TEST_DB_URL) -v $(PWD)/api:/api api
+
+unit-tests:
+	$(PYTEST_RUN) pytest tests/unit
+
+functional-tests:
+	$(PYTEST_RUN) pytest tests/functional
+
+tests:
+	$(PYTEST_RUN) pytest tests --cov=app --cov-report=term-missing --cov-fail-under=100
+
+lint:
+	$(DOCKER_COMPOSE) run --rm -v $(PWD)/api:/api api ruff check app tests
+
+.PHONY: run rebuild-run stop down logs ps shell apply-migration create-migration unit-tests functional-tests tests lint
