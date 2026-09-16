@@ -1,6 +1,16 @@
-import { createContext, useContext, useReducer } from 'react'
+import { createContext, useContext, useEffect, useReducer } from 'react'
 
 const CartContext = createContext(null)
+const STORAGE_KEY = 'gila_cart'
+
+function loadFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    return raw ? JSON.parse(raw) : {}
+  } catch {
+    return {}
+  }
+}
 
 function reducer(state, action) {
   switch (action.type) {
@@ -35,7 +45,14 @@ function reducer(state, action) {
 }
 
 export function CartProvider({ children }) {
-  const [items, dispatch] = useReducer(reducer, {})
+  const [items, dispatch] = useReducer(reducer, undefined, loadFromStorage)
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
+    } catch {
+    }
+  }, [items])
 
   function addItem(product) {
     dispatch({ type: 'ADD', product })

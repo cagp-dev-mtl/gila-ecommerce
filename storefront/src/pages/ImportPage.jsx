@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { formatError, importProducts } from '../api/client'
+import PageBanner from '../components/PageBanner'
 
 function ImportPage() {
   const [file, setFile] = useState(null)
@@ -11,9 +12,7 @@ function ImportPage() {
 
   async function handleSubmit(event) {
     event.preventDefault()
-    if (!file) {
-      return
-    }
+    if (!file) return
     setLoading(true)
     setError(null)
     setReport(null)
@@ -28,76 +27,79 @@ function ImportPage() {
   }
 
   return (
-    <section className="form-page">
-      <h2>Import products</h2>
-      <p className="muted">
-        Upload a CSV with columns name, sku, description, category, price, stock, weight_kg. Each row
-        is validated independently and the result is reported below.
-      </p>
+    <section>
+      <PageBanner title="Import Catalog" crumb="Home / Import" />
 
-      <form className="import-form" onSubmit={handleSubmit}>
-        <input
-          className="input"
-          type="file"
-          accept=".csv,text/csv"
-          onChange={(event) => setFile(event.target.files[0] || null)}
-        />
-        <button className="button button-primary" type="submit" disabled={!file || loading}>
-          {loading ? 'Importing...' : 'Import'}
-        </button>
-      </form>
+      <div className="form-page">
+        <p className="muted">
+          Upload a CSV with columns name, sku, description, category, price, stock, weight_kg. Each
+          row is validated independently and the result is reported below.
+        </p>
 
-      {error && <p className="alert alert-error">{error}</p>}
+        <form className="import-form" onSubmit={handleSubmit}>
+          <input
+            className="input"
+            type="file"
+            accept=".csv,text/csv"
+            onChange={(event) => setFile(event.target.files[0] || null)}
+          />
+          <button className="button button-primary" type="submit" disabled={!file || loading}>
+            {loading ? 'Importing...' : 'Import'}
+          </button>
+        </form>
 
-      {report && (
-        <div className="report">
-          <div className="stats">
-            <div className="stat">
-              <span className="stat-value">{report.total}</span>
-              <span className="stat-label">Total rows</span>
-            </div>
-            <div className="stat">
-              <span className="stat-value stat-ok">{report.imported}</span>
-              <span className="stat-label">Imported</span>
-            </div>
-            <div className="stat">
-              <span className="stat-value stat-ok">{report.updated}</span>
-              <span className="stat-label">Updated</span>
-            </div>
-            <div className="stat">
-              <span className="stat-value">{report.skipped}</span>
-              <span className="stat-label">Skipped</span>
-            </div>
-            <div className="stat">
-              <span className="stat-value stat-error">{report.errors.length}</span>
-              <span className="stat-label">Rejected</span>
-            </div>
-          </div>
+        {error && <p className="alert alert-error">{error}</p>}
 
-          {report.errors.length > 0 && (
-            <table className="error-table">
-              <thead>
-                <tr>
-                  <th>Row</th>
-                  <th>Reason</th>
-                </tr>
-              </thead>
-              <tbody>
-                {report.errors.map((item) => (
-                  <tr key={item.row}>
-                    <td>{item.row}</td>
-                    <td>{item.reason}</td>
+        {report && (
+          <div className="report">
+            <div className="stats">
+              <div className="stat">
+                <span className="stat-value">{report.total}</span>
+                <span className="stat-label">Total rows</span>
+              </div>
+              <div className="stat">
+                <span className="stat-value stat-ok">{report.imported}</span>
+                <span className="stat-label">Imported</span>
+              </div>
+              <div className="stat">
+                <span className="stat-value stat-ok">{report.updated}</span>
+                <span className="stat-label">Updated</span>
+              </div>
+              <div className="stat">
+                <span className="stat-value">{report.skipped}</span>
+                <span className="stat-label">Skipped</span>
+              </div>
+              <div className="stat">
+                <span className="stat-value stat-error">{report.errors.length}</span>
+                <span className="stat-label">Rejected</span>
+              </div>
+            </div>
+
+            {report.errors.length > 0 && (
+              <table className="error-table">
+                <thead>
+                  <tr>
+                    <th>Row</th>
+                    <th>Reason</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
+                </thead>
+                <tbody>
+                  {report.errors.map((item) => (
+                    <tr key={item.row}>
+                      <td>{item.row}</td>
+                      <td>{item.reason}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
 
-          <Link className="button" to="/">
-            View catalog
-          </Link>
-        </div>
-      )}
+            <Link className="button" to="/">
+              View catalog
+            </Link>
+          </div>
+        )}
+      </div>
     </section>
   )
 }

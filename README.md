@@ -7,21 +7,15 @@ Full-stack product catalog and checkout. A Python and FastAPI API, a React and V
 You only need Docker and Docker Compose. No local Python or Node install is required.
 
 1. Clone the repository and enter it.
-2. Create the environment file from the template:
+2. Build and start everything:
 
    ```bash
-   cp .env.example .env
+   docker compose up -d --build
    ```
 
-3. Build and start everything:
+   If you have `make` installed, `make run` is equivalent.
 
-   ```bash
-   make run
-   ```
-
-   Without Make, the equivalent is `docker compose up -d --build`.
-
-4. Open the app:
+3. Open the app:
 
    - Storefront: http://localhost:8080
    - API docs: http://localhost:8000/api/docs
@@ -31,7 +25,31 @@ On first start the API applies database migrations and seeds the catalog automat
 To stop and remove the stack:
 
 ```bash
-make down
+docker compose down
+```
+
+## Connecting to the database
+
+PostgreSQL is exposed on the host at port 5432. Connect with any client using:
+
+| Field    | Value      |
+| -------- | ---------- |
+| Host     | localhost  |
+| Port     | 5432       |
+| Database | ecommerce  |
+| User     | ecommerce  |
+| Password | ecommerce  |
+
+From the terminal:
+
+```bash
+psql postgresql://ecommerce:ecommerce@localhost:5432/ecommerce
+```
+
+Or via `docker exec` without a local `psql` install:
+
+```bash
+docker exec -it gila-ecommerce-db-1 psql -U ecommerce -d ecommerce
 ```
 
 ## What you can do
@@ -93,15 +111,11 @@ Day-to-day commands beyond `make run`, `make down`, and `make tests`:
 | `make apply-migration` | Run `alembic upgrade head` |
 | `make create-migration REVISION="message"` | Create a new migration |
 
-## Continuous integration
-
-GitHub Actions runs ruff, the pytest suite with the coverage gate, and the storefront build on every pull request. In an organization repository this workflow would be a required status check, blocking merges when lint, tests, or the build fail.
-
 ## Design decisions
 
 ### Stack and storage
 
-Both SQL and NoSQL were on the table. Checkout needs atomic stock updates and uniqueness guarantees, and the catalog is naturally relational, so PostgreSQL was the better fit than a document store. Money values use `Numeric` rather than floats to avoid rounding drift, and integrity is enforced in the schema: unique constraints on SKU and idempotency key, and check constraints on price, stock, and quantity.
+Both SQL and NoSQL were on the table. Checkout needs atomic stock updates and uniqueness guarantees, and the catalog is naturally relational, so PostgreSQL was the better fit than a document store. Money values use `Numeric` rather than floats to avoid rounding drift, and integrity is enforced in the schema: unique constraints on SKU and idempotency key, and check constraints on price, stock, and quantity. Schema changes are managed with Alembic, which runs migrations automatically on startup so the database is always in sync with the application without any manual step.
 
 The API is Python and FastAPI. A typed and async framework with first-class OpenAPI docs keeps the surface small and self-documenting. The storefront is React and Vite, served as static files by nginx. A heavier meta-framework was considered and set aside as unnecessary for this scope.
 
@@ -121,15 +135,34 @@ Checkout is transactional and safe under concurrent load. Stock is read with `SE
 
 Seeding reuses the import pipeline rather than a separate loader, so seeded data passes the same validation and produces the same report. It runs only when the catalog is empty, which keeps startup idempotent across restarts.
 
-### Testing
+### Testing and CI
 
 The suite enforces 100% line coverage. The gate is used as a design tool: it surfaced and removed dead code, and it caught checkout integrity handling that only fires under a specific race. Coverage scope is controlled through configuration rather than inline directives, keeping source files clean.
+
+GitHub Actions runs ruff, the pytest suite with the coverage gate, and the storefront build on every pull request. In an organization repository this workflow would be a required status check, blocking merges when lint, tests, or the build fail.
+
+### Alternatives considered
+
+The reasoning behind each choice is in the sections above. In summary:
+
+| Chosen | Alternative considered | Why the alternative was set aside |
+| ------ | ---------------------- | --------------------------------- |
+| PostgreSQL | NoSQL document store | Checkout needs atomic stock updates and uniqueness guarantees, and the catalog is naturally relational. |
+| `Numeric` money | Floating point | Floats drift on rounding, which is unacceptable for prices and totals. |
+| React and Vite served as static files | A heavier meta-framework | Unnecessary for this scope; adds build and runtime complexity without benefit here. |
+| Pipelines of small steps | Logic inside route handlers | Faster to write, but harder to test in isolation and reuse. |
+| Per-row import report | Failing the whole file on the first bad row | Real catalog data is messy; treating bad rows as data is more useful than rejecting the upload. |
+| Seed via the import pipeline | A separate seed loader | Reuse means seeded data passes the same validation and produces the same report. |
+| Coverage scope via configuration | Inline coverage directives | Keeps source files clean of tooling comments. |
 
 ### Trade-offs and next steps
 
 - The storefront has no automated tests yet; its build runs in CI. Component and end-to-end tests are the natural next addition.
 - Authentication and authorization are out of scope for this iteration.
 - For production, the services would ship metrics, traces, and logs to Datadog, with distributed tracing across storefront, API, and database. Monitors would route alerts to Slack for elevated 5xx rates, checkout error spikes, latency, and database saturation.
+
+Known limitations and the data-quality findings from the example catalog are tracked
+separately in [KNOWN_ISSUES.md](KNOWN_ISSUES.md).
 
 ## Project layout
 
