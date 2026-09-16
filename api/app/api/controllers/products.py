@@ -1,17 +1,48 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+import math
+from typing import Literal
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app.api.schemas.product import ProductCreate, ProductRead, ProductUpdate
+from app.api.schemas.product import ProductCreate, ProductPage, ProductRead, ProductUpdate
 from app.core.db import get_session
 from app.models.orm.product import ProductORM
 from app.repositories.product_repository import ProductRepository
 
 router = APIRouter(prefix='/products', tags=['products'])
 
+SORT_COLUMNS = {
+    'name': ProductORM.name,
+    'price': ProductORM.price,
+    'newest': ProductORM.created_at,
+}
 
-@router.get('', response_model=list[ProductRead])
-def list_products(session: Session = Depends(get_session)) -> list[ProductORM]:
-    return ProductRepository(session).list()
+
+@router.get('', response_model=ProductPage)
+def list_products(
+    search: str | None = Query(default=None, max_length=255),
+    category: str | None = Query(default=None, max_length=128),
+    sort: Literal['name', 'price', 'newest'] = 'name',
+    order: Literal['asc', 'desc'] = 'asc',
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=12, ge=1, le=100),
+    session: Session = Depends(get_session),
+) -> ProductPage:
+    items, total = ProductRepository(session).search(
+        search, category, SORT_COLUMNS[sort], order == 'desc', page, page_size
+    )
+    return ProductPage(
+        items=[ProductRead.model_validate(item) for item in items],
+        total=total,
+        page=page,
+        page_size=page_size,
+        pages=math.ceil(total / page_size) if total else 0,
+    )
+
+
+@router.get('/categories', response_model=list[str])
+def list_categories(session: Session = Depends(get_session)) -> list[str]:
+    return ProductRepository(session).list_categories()
 
 
 @router.post('', response_model=ProductRead, status_code=status.HTTP_201_CREATED)

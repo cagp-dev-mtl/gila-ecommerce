@@ -37,3 +37,11 @@ class ProductRead(ProductBase):
     id: int
     created_at: datetime
     updated_at: datetime
+
+
+class ProductPage(BaseModel):
+    items: list[ProductRead]
+    total: int
+    page: int
+    page_size: int
+    pages: int
