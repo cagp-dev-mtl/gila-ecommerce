@@ -20,6 +20,14 @@ You only need Docker and Docker Compose. No local Python or Node install is requ
    - Storefront: http://localhost:8080
    - API docs: http://localhost:8000/api/docs
 
+The command starts three containers:
+
+| Container | Role |
+| --------- | ---- |
+| `gila-ecommerce-db-1` | PostgreSQL 16 — port 5432 |
+| `gila-ecommerce-api-1` | FastAPI application — port 8000 (runs migrations and seeds on first start) |
+| `gila-ecommerce-storefront-1` | React app served by nginx — port 8080 |
+
 On first start the API applies database migrations and seeds the catalog automatically, so the storefront has products right away.
 
 To stop and remove the stack:
@@ -163,6 +171,35 @@ The reasoning behind each choice is in the sections above. In summary:
 
 Known limitations and the data-quality findings from the example catalog are tracked
 separately in [KNOWN_ISSUES.md](KNOWN_ISSUES.md).
+
+## Architecture
+
+```
+Browser
+  │
+  │  HTTP :8080
+  ▼
+┌─────────────────────────────┐
+│  storefront (nginx)         │  React + Vite — static files
+│  gila-ecommerce-storefront  │
+└─────────────┬───────────────┘
+              │
+              │  REST API :8000
+              ▼
+┌─────────────────────────────┐
+│  api (FastAPI + uvicorn)    │  Python — controllers, services,
+│  gila-ecommerce-api         │  pipelines, repositories, Alembic
+└─────────────┬───────────────┘
+              │
+              │  PostgreSQL :5432
+              ▼
+┌─────────────────────────────┐
+│  db (PostgreSQL 16)         │  products, orders, order_items
+│  gila-ecommerce-db          │
+└─────────────────────────────┘
+```
+
+All three run inside Docker Compose on a shared network. The storefront talks to the API; the API is the only service that touches the database.
 
 ## Project layout
 
