@@ -224,3 +224,75 @@ body {
   justify-content: flex-end;
   gap: 12px;
 }
+
+.import-form {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  min-width: 110px;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.stat-ok {
+  color: #059669;
+}
+
+.stat-error {
+  color: var(--danger);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.error-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.error-table th,
+.error-table td {
+  text-align: left;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+
+.error-table th {
+  background: #f9fafb;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.error-table td:first-child {
+  width: 80px;
+  font-variant-numeric: tabular-nums;
+}
