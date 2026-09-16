@@ -25,4 +25,10 @@ ps:
 shell:
 	$(DOCKER_COMPOSE) exec api bash
 
-.PHONY: run rebuild-run stop down logs ps shell
+apply-migration:
+	$(DOCKER_COMPOSE) exec api alembic upgrade head
+
+create-migration:
+	$(DOCKER_COMPOSE) exec api alembic revision -m "$(REVISION)"
+
+.PHONY: run rebuild-run stop down logs ps shell apply-migration create-migration
