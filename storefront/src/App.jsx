@@ -1,9 +1,18 @@
+import { Route, Routes } from 'react-router-dom'
+
+import Layout from './components/Layout'
+import ProductForm from './pages/ProductForm'
+import ProductList from './pages/ProductList'
+
 function App() {
   return (
-    <main>
-      <h1>Gila Commerce</h1>
-      <p>Storefront coming soon.</p>
-    </main>
+    <Layout>
+      <Routes>
+        <Route path="/" element={<ProductList />} />
+        <Route path="/products/new" element={<ProductForm />} />
+        <Route path="/products/:id/edit" element={<ProductForm />} />
+      </Routes>
+    </Layout>
   )
 }
 
