@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { createOrder, formatError } from '../api/client'
@@ -9,11 +9,14 @@ function CartPage() {
   const [submitting, setSubmitting] = useState(false)
   const [order, setOrder] = useState(null)
   const [error, setError] = useState(null)
+  const cartSignature = entries
+    .map((entry) => `${entry.product.id}:${entry.quantity}`)
+    .join('|')
+  const idempotencyKey = useMemo(() => crypto.randomUUID(), [cartSignature])
 
   async function handleCheckout() {
     setSubmitting(true)
     setError(null)
-    const idempotencyKey = crypto.randomUUID()
     try {
       const result = await createOrder(
         entries.map((entry) => ({ product_id: entry.product.id, quantity: entry.quantity })),

@@ -2,6 +2,7 @@ import math
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.api.schemas.product import ProductCreate, ProductPage, ProductRead, ProductUpdate
@@ -48,10 +49,12 @@ def list_categories(session: Session = Depends(get_session)) -> list[str]:
 @router.post('', response_model=ProductRead, status_code=status.HTTP_201_CREATED)
 def create_product(payload: ProductCreate, session: Session = Depends(get_session)) -> ProductORM:
     repository = ProductRepository(session)
-    if repository.get_by_sku(payload.sku):
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='sku already exists')
-    product = repository.add(ProductORM(**payload.model_dump()))
-    session.commit()
+    try:
+        product = repository.add(ProductORM(**payload.model_dump()))
+        session.commit()
+    except IntegrityError:
+        session.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='sku already exists') from None
     session.refresh(product)
     return product
 
@@ -72,12 +75,13 @@ def update_product(
     product = repository.get(product_id)
     if product is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='product not found')
-    conflict = repository.get_by_sku(payload.sku)
-    if conflict is not None and conflict.id != product_id:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='sku already exists')
     for field, value in payload.model_dump().items():
         setattr(product, field, value)
-    session.commit()
+    try:
+        session.commit()
+    except IntegrityError:
+        session.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='sku already exists') from None
     session.refresh(product)
     return product
 
@@ -88,5 +92,11 @@ def delete_product(product_id: int, session: Session = Depends(get_session)) -> 
     product = repository.get(product_id)
     if product is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='product not found')
-    repository.delete(product)
-    session.commit()
+    try:
+        repository.delete(product)
+        session.commit()
+    except IntegrityError:
+        session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail='product belongs to existing orders'
+        ) from None

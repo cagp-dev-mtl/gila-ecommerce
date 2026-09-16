@@ -7,6 +7,8 @@ from app.services.csv_import_service import CsvImportService, MissingColumnsErro
 
 router = APIRouter(prefix='/products', tags=['products'])
 
+MAX_UPLOAD_BYTES = 5 * 1024 * 1024
+
 
 @router.post('/import', response_model=ImportReport)
 async def import_products(
@@ -17,7 +19,11 @@ async def import_products(
         raise HTTPException(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail='a CSV file is required'
         )
-    content = await file.read()
+    content = await file.read(MAX_UPLOAD_BYTES + 1)
+    if len(content) > MAX_UPLOAD_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail='file exceeds the 5 MB limit'
+        )
     try:
         text = content.decode('utf-8-sig')
     except UnicodeDecodeError:

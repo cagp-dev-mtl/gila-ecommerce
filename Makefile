@@ -5,9 +5,6 @@ else
 endif
 
 run:
-	$(DOCKER_COMPOSE) up -d
-
-rebuild-run:
 	$(DOCKER_COMPOSE) up -d --build
 
 stop:
@@ -31,8 +28,7 @@ apply-migration:
 create-migration:
 	$(DOCKER_COMPOSE) exec api alembic revision -m "$(REVISION)"
 
-TEST_DB_URL = postgresql+psycopg://ecommerce:ecommerce@db:5432/ecommerce_test
-PYTEST_RUN = $(DOCKER_COMPOSE) run --rm -e DATABASE_URL=$(TEST_DB_URL) -v $(PWD)/api:/api api
+PYTEST_RUN = $(DOCKER_COMPOSE) run --rm api-test
 
 unit-tests:
 	$(PYTEST_RUN) pytest tests/unit
@@ -44,6 +40,6 @@ tests:
 	$(PYTEST_RUN) pytest tests --cov=app --cov-report=term-missing --cov-fail-under=100
 
 lint:
-	$(DOCKER_COMPOSE) run --rm -v $(PWD)/api:/api api ruff check app tests
+	$(DOCKER_COMPOSE) run --rm api-test ruff check app tests
 
-.PHONY: run rebuild-run stop down logs ps shell apply-migration create-migration unit-tests functional-tests tests lint
+.PHONY: run stop down logs ps shell apply-migration create-migration unit-tests functional-tests tests lint

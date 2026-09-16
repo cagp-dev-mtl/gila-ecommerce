@@ -60,3 +60,11 @@ def test_delete_product(client):
 
 def test_delete_missing_product(client):
     assert client.delete('/api/products/999').status_code == 404
+
+
+def test_delete_product_with_orders_conflicts(client):
+    product = client.post('/api/products', json=make_payload()).json()
+    order = client.post('/api/orders', json={'items': [{'product_id': product['id'], 'quantity': 1}]})
+    assert order.status_code == 201
+    response = client.delete(f"/api/products/{product['id']}")
+    assert response.status_code == 409
