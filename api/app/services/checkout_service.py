@@ -34,8 +34,8 @@ class CheckoutService:
             },
         )
         result = run_pipeline(CHECKOUT_STEPS, context)
-        order = self._persist(result.plan, locked, idempotency_key)
         try:
+            order = self._persist(result.plan, locked, idempotency_key)
             self.session.commit()
         except IntegrityError:
             self.session.rollback()
