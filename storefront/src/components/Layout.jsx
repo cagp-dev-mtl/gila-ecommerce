@@ -9,6 +9,7 @@ function Layout({ children }) {
         </Link>
         <nav className="app-nav">
           <Link to="/">Catalog</Link>
+          <Link to="/import">Import</Link>
           <Link to="/products/new" className="button button-primary">
             New product
           </Link>

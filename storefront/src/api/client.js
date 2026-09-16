@@ -57,6 +57,17 @@ export function listCategories() {
   return request('/products/categories')
 }
 
+export async function importProducts(file) {
+  const body = new FormData()
+  body.append('file', file)
+  const response = await fetch(`${BASE}/products/import`, { method: 'POST', body })
+  if (!response.ok) {
+    const detail = await response.json().catch(() => null)
+    throw new ApiError(response.status, detail ? detail.detail : response.statusText)
+  }
+  return response.json()
+}
+
 export function formatError(error) {
   const detail = error && error.detail
   if (Array.isArray(detail)) {
