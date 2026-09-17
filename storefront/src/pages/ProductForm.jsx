@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { createProduct, formatError, getProduct, updateProduct } from '../api/client'
 
@@ -76,6 +76,7 @@ function ProductForm() {
 
   return (
     <section className="form-page">
+      <Link className="back-link" to="/admin">← Back to Admin</Link>
       <h2>{editing ? 'Edit product' : 'New product'}</h2>
       {error && <p className="alert alert-error">{error}</p>}
       <form className="form" onSubmit={handleSubmit}>
