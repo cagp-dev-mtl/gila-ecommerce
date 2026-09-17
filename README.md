@@ -227,3 +227,8 @@ storefront/  React and Vite storefront
 docker-compose.yml
 Makefile
 ```
+
+## Video
+
+https://github.com/user-attachments/assets/6571e9d4-afdd-4e47-99b8-3f05c503513d
+
