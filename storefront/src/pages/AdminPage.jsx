@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 
 import { deleteProduct, formatError, listCategories, listProducts } from '../api/client'
 import PageBanner from '../components/PageBanner'
@@ -9,6 +9,7 @@ const PAGE_SIZE = 20
 const EMPTY_PAGE = { items: [], total: 0, page: 1, pages: 0 }
 
 function AdminPage() {
+  const location = useLocation()
   const [data, setData] = useState(EMPTY_PAGE)
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
@@ -16,6 +17,14 @@ function AdminPage() {
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [success, setSuccess] = useState(() => {
+    if (location.state?.saved && location.state?.name) {
+      return location.state.saved === 'updated'
+        ? `"${location.state.name}" was updated.`
+        : `"${location.state.name}" was created.`
+    }
+    return null
+  })
   const debouncedSearch = useDebounce(search, 300)
 
   useEffect(() => {
@@ -100,6 +109,12 @@ function AdminPage() {
         </select>
       </div>
 
+      {success && (
+        <p className="alert alert-success">
+          {success}
+          <button className="alert-dismiss" onClick={() => setSuccess(null)}>✕</button>
+        </p>
+      )}
       {error && <p className="alert alert-error">{error}</p>}
 
       {loading && data.items.length === 0 ? (
