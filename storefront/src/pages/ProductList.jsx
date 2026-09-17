@@ -1,12 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useRef, useState, useCallback } from 'react'
 
-import { deleteProduct, formatError, listCategories, listProducts } from '../api/client'
+import { formatError, listCategories, listProducts } from '../api/client'
 import ProductImage from '../components/ProductImage'
 import { useCart } from '../context/CartContext'
 import { useDebounce } from '../hooks/useDebounce'
 
-const PAGE_SIZE = 12
+const PAGE_SIZE = 10
 const EMPTY_PAGE = { items: [], total: 0, page: 1, page_size: PAGE_SIZE, pages: 0 }
 
 function ProductList() {
@@ -22,6 +21,13 @@ function ProductList() {
   const debouncedSearch = useDebounce(search, 300)
   const { addItem } = useCart()
   const catalogRef = useRef(null)
+  const [addedId, setAddedId] = useState(null)
+
+  const handleAddItem = useCallback((product) => {
+    addItem(product)
+    setAddedId(product.id)
+    setTimeout(() => setAddedId(null), 1200)
+  }, [addItem])
 
   const hasFilters = search !== '' || category !== ''
 
@@ -69,20 +75,6 @@ function ProductList() {
     setCategory((current) => (current === name ? '' : name))
     setPage(1)
     catalogRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
-
-  async function handleDelete(product) {
-    if (!window.confirm(`Delete "${product.name}"?`)) return
-    try {
-      await deleteProduct(product.id)
-      setData((current) => ({
-        ...current,
-        items: current.items.filter((item) => item.id !== product.id),
-        total: current.total - 1,
-      }))
-    } catch (err) {
-      setError(formatError(err))
-    }
   }
 
   return (
@@ -186,24 +178,12 @@ function ProductList() {
                 </div>
                 <div className="product-card-footer">
                   <button
-                    className="btn-add-cart"
+                    className={`btn-add-cart${addedId === product.id ? ' btn-add-cart--added' : ''}`}
                     disabled={product.stock === 0}
-                    onClick={() => addItem(product)}
+                    onClick={() => handleAddItem(product)}
                   >
-                    {product.stock === 0 ? 'Out of stock' : 'Add to cart'}
+                    {addedId === product.id ? '✓ Added' : product.stock === 0 ? 'Out of stock' : 'Add to cart'}
                   </button>
-                  <div className="product-admin">
-                    <Link className="admin-link" to={`/products/${product.id}/edit`}>
-                      Edit
-                    </Link>
-                    <span className="admin-sep">·</span>
-                    <button
-                      className="admin-link admin-link-danger"
-                      onClick={() => handleDelete(product)}
-                    >
-                      Delete
-                    </button>
-                  </div>
                 </div>
               </article>
             ))}
