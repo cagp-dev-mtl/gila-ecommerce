@@ -62,10 +62,28 @@ docker exec -it gila-ecommerce-db-1 psql -U ecommerce -d ecommerce
 
 ## What you can do
 
-- Browse the catalog with search, category filter, sorting, and pagination.
-- Create, edit, and delete products.
-- Import products from a CSV upload and see a per-row report.
-- Add products to a cart and check out.
+The storefront has two areas: the customer-facing catalog and an admin section.
+
+**Catalog** (the default view)
+
+- Browse products with full-text search, category filter, sort, and pagination.
+- Click a category chip in the strip below the hero to filter by category.
+- Add products to the cart directly from the product cards.
+
+**Cart**
+
+- Adjust quantities or remove items with the stepper controls.
+- Proceed to checkout, enter fake card details, and place the order.
+- A confirmation screen shows the order ID and payment reference.
+- Cart contents survive a page refresh (stored in the browser).
+
+**Admin** (top-right nav button)
+
+- View all products in a paginated table with name, SKU, category, price, and stock.
+- Edit any product via the Edit button on its row.
+- Delete a product via the Delete button (blocked with a 409 if the product has existing orders).
+- Create a new product with the New product button.
+- Import products in bulk from a CSV file with the Import catalog button, and see a per-row report of what was imported, updated, skipped, or rejected.
 
 ## How the catalog is seeded
 

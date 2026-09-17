@@ -57,39 +57,43 @@ body {
   gap: 4px;
 }
 
-.nav-link {
-  padding: 6px 12px;
-  color: var(--muted);
-  text-decoration: none;
-  font-weight: 500;
-  border-radius: var(--radius);
-  transition: color 0.15s, background 0.15s;
-}
-
-.nav-link:hover {
-  color: var(--text);
-  background: var(--bg);
-}
-
-.nav-cart {
+.nav-link,
+.nav-cart,
+.nav-admin {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 6px 14px;
-  border: 1px solid var(--border);
   border-radius: var(--radius);
   color: var(--text);
   text-decoration: none;
-  font-weight: 500;
-  font-size: 14px;
-  background: var(--surface);
-  transition: border-color 0.15s, background 0.15s, color 0.15s;
+  font-weight: 600;
+  font-size: 16px;
+  border: 1px solid transparent;
+  background: transparent;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
 }
 
-.nav-cart:hover {
+.nav-link:hover,
+.nav-cart:hover,
+.nav-admin:hover {
+  background: var(--bg);
+  border-color: var(--border);
+}
+
+.nav-link--active,
+.nav-cart--active,
+.nav-admin--active {
+  background: var(--primary);
+  color: #fff;
   border-color: var(--primary);
-  background: var(--primary-light);
-  color: var(--primary);
+}
+
+.nav-link--active:hover,
+.nav-cart--active:hover,
+.nav-admin--active:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
 }
 
 .cart-badge {
@@ -106,23 +110,9 @@ body {
   font-weight: 700;
 }
 
-.nav-primary {
-  padding: 7px 16px;
-  background: var(--primary);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius);
-  font-size: 14px;
-  font-weight: 600;
-  font-family: inherit;
-  text-decoration: none;
-  cursor: pointer;
-  transition: background 0.15s;
-  margin-left: 8px;
-}
-
-.nav-primary:hover {
-  background: var(--primary-hover);
+.nav-cart--active .cart-badge {
+  background: #fff;
+  color: var(--primary);
 }
 
 /* ---- Layout ---- */
@@ -347,11 +337,20 @@ body {
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.2s, transform 0.15s;
 }
 
 .btn-add-cart:hover {
   background: var(--primary-hover);
+}
+
+.btn-add-cart--added {
+  background: var(--success);
+  transform: scale(1.03);
+}
+
+.btn-add-cart--added:hover {
+  background: var(--success);
 }
 
 .btn-add-cart:disabled {
@@ -395,6 +394,74 @@ body {
   color: var(--border);
   font-size: 12px;
   user-select: none;
+}
+
+/* ---- Admin ---- */
+
+.admin-toolbar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.admin-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 24px;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.admin-table th {
+  padding: 10px 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.admin-table tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-table tr:hover td {
+  background: var(--bg);
+}
+
+.admin-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.button-sm {
+  padding: 4px 12px;
+  font-size: 13px;
+}
+
+.button-danger {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.button-danger:hover {
+  background: var(--danger);
+  color: #fff;
 }
 
 /* ---- Pagination ---- */
@@ -802,13 +869,22 @@ body {
 /* ---- Hero ---- */
 
 .hero {
-  background: linear-gradient(135deg, var(--primary) 0%, #3730a3 100%);
+  background: url('./assets/hero-bg.jpg') center center / cover no-repeat;
   color: #fff;
   margin: -32px -32px 0;
   padding: 80px 48px;
   text-align: center;
   position: relative;
   overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 15, 50, 0.55);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .hero::before {
@@ -823,17 +899,6 @@ body {
   pointer-events: none;
 }
 
-.hero::after {
-  content: '';
-  position: absolute;
-  width: 280px;
-  height: 280px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.05);
-  bottom: -80px;
-  left: -60px;
-  pointer-events: none;
-}
 
 .hero-content {
   position: relative;
@@ -852,7 +917,7 @@ body {
 }
 
 .hero-title {
-  font-size: 44px;
+  font-size: 32px;
   font-weight: 700;
   letter-spacing: -0.5px;
   line-height: 1.15;

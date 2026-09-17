@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 
 import { useCart } from '../context/CartContext'
 import Footer from './Footer'
@@ -9,23 +9,30 @@ function Layout({ children }) {
   return (
     <div className="app">
       <header className="app-header">
-        <Link to="/" className="brand">
+        <NavLink to="/" className="brand">
           Gila Commerce
-        </Link>
+        </NavLink>
         <nav className="app-nav">
-          <Link to="/" className="nav-link">
+          <NavLink
+            to="/"
+            end
+            className={({ isActive }) => `nav-link${isActive ? ' nav-link--active' : ''}`}
+          >
             Catalog
-          </Link>
-          <Link to="/import" className="nav-link">
-            Import
-          </Link>
-          <Link to="/cart" className="nav-cart">
+          </NavLink>
+          <NavLink
+            to="/cart"
+            className={({ isActive }) => `nav-cart${isActive ? ' nav-cart--active' : ''}`}
+          >
             Cart
             {count > 0 && <span className="cart-badge">{count}</span>}
-          </Link>
-          <Link to="/products/new" className="nav-primary">
-            New product
-          </Link>
+          </NavLink>
+          <NavLink
+            to="/admin"
+            className={({ isActive }) => `nav-admin${isActive ? ' nav-admin--active' : ''}`}
+          >
+            Admin
+          </NavLink>
         </nav>
       </header>
       <main className="app-main">{children}</main>
