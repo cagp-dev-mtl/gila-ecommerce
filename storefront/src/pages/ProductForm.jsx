@@ -66,7 +66,7 @@ function ProductForm() {
       } else {
         await createProduct(payload)
       }
-      navigate('/')
+      navigate('/admin', { state: { saved: editing ? 'updated' : 'created', name: form.name } })
     } catch (err) {
       setError(formatError(err))
     } finally {
@@ -112,7 +112,7 @@ function ProductForm() {
           <input className="input" type="number" step="0.001" min="0" value={form.weight_kg} onChange={update('weight_kg')} />
         </label>
         <div className="form-actions">
-          <button type="button" className="button" onClick={() => navigate('/')}>
+          <button type="button" className="button" onClick={() => navigate('/admin')}>
             Cancel
           </button>
           <button type="submit" className="button button-primary" disabled={saving}>
