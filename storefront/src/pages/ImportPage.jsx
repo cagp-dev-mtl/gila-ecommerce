@@ -29,6 +29,7 @@ function ImportPage() {
   return (
     <section>
       <PageBanner title="Import Catalog" crumb="Home / Import" />
+      <Link className="back-link" to="/admin">← Back to Admin</Link>
 
       <div className="form-page">
         <p className="muted">

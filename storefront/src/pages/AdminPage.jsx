@@ -17,15 +17,30 @@ function AdminPage() {
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [success, setSuccess] = useState(() => {
+  const [notice, setNotice] = useState(() => {
     if (location.state?.saved && location.state?.name) {
-      return location.state.saved === 'updated'
-        ? `"${location.state.name}" was updated.`
-        : `"${location.state.name}" was created.`
+      return {
+        type: 'success',
+        message: location.state.saved === 'updated'
+          ? `"${location.state.name}" was updated.`
+          : `"${location.state.name}" was created.`,
+      }
     }
     return null
   })
   const debouncedSearch = useDebounce(search, 300)
+
+  useEffect(() => {
+    if (!notice) return
+    const timer = setTimeout(() => setNotice(null), 5000)
+    return () => clearTimeout(timer)
+  }, [notice])
+
+  useEffect(() => {
+    if (!error) return
+    const timer = setTimeout(() => setError(null), 5000)
+    return () => clearTimeout(timer)
+  }, [error])
 
   useEffect(() => {
     listCategories()
@@ -73,6 +88,7 @@ function AdminPage() {
         items: current.items.filter((item) => item.id !== product.id),
         total: current.total - 1,
       }))
+      setNotice({ type: 'info', message: `"${product.name}" was deleted.` })
     } catch (err) {
       setError(formatError(err))
     }
@@ -109,10 +125,10 @@ function AdminPage() {
         </select>
       </div>
 
-      {success && (
-        <p className="alert alert-success">
-          {success}
-          <button className="alert-dismiss" onClick={() => setSuccess(null)}>✕</button>
+      {notice && (
+        <p className={`alert alert-${notice.type}`}>
+          {notice.message}
+          <button className="alert-dismiss" onClick={() => setNotice(null)}>✕</button>
         </p>
       )}
       {error && <p className="alert alert-error">{error}</p>}
